@@ -16,8 +16,10 @@ geometry = SOMGeometry(
 
 quantizer = HardSOM(128, 512, 0.99, geometry)
 
-loss, output, perplexity, _ = qunatizer(input)
+loss, output, perplexity, _ = quantizer(input)
 ```
+
+You can also take a look at `example.py`.
 
 ## Installation
 
