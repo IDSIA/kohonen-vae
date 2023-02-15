@@ -1,0 +1,41 @@
+program: main.py
+command:
+  - ${env}
+  - python3
+  - ${program}
+  - ${args}
+method: grid
+metric:
+  name: validation/mean_accuracy
+  goal: maximize
+parameters:
+  log:
+    value: wandb
+  task:
+    value: vq_vae2_face_mixture
+  stop_after:
+    value: 30000
+  lr:
+    value: 3e-4
+  batch_size:
+    value: 128
+  test_batch_size:
+    value: 256
+  wd:
+    value: 0
+  optimizer:
+    value: adamw
+  amp:
+    value: 0
+  vq_vae.quantizer:
+    value: hard_som
+  vq_vae.neihborhood:
+    value: none
+  vq_vae.magic_counter_init:
+    value: 1.0
+  sweep_id_for_grid_search:
+    distribution: categorical
+    values:
+      - 1
+      - 2
+      - 3

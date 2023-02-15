@@ -1,0 +1,233 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "VQ VAE",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/main.py",
+            "console": "integratedTerminal",
+            "args": ["--name", "vq_vae", "--task", "vq_vae", "--log", "tb",
+                     "--keep_alive", "1", "-reset", "1", "-stop_after", "60000",
+                    "--test_interval", "1000",
+                     "-lr", "1e-3", "-batch_size", "256", "-optimizer", "adamw",
+                     "-amp", "0", "-vq_vae.grid_dim", "1", "-vq_vae.num_embeddings", "512"]
+        },
+
+        {
+            "name": "VQ VAE 2D",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/main.py",
+            "console": "integratedTerminal",
+            "args": ["--name", "vq_vae_2d", "--task", "vq_vae", "--log", "tb",
+                     "--keep_alive", "1", "-reset", "1", "-stop_after", "60000",
+                    "--test_interval", "1000",
+                     "-lr", "1e-3", "-batch_size", "256", "-optimizer", "adamw",
+                     "-amp", "0", "-vq_vae.grid_dim", "2", "-vq_vae.num_embeddings", "512"]
+        },
+
+        {
+            "name": "VQ VAE baseline",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/main.py",
+            "console": "integratedTerminal",
+            "args": ["--name", "vq_vae_base", "--task", "vq_vae", "--log", "tb",
+                     "--keep_alive", "1", "-reset", "1", "-stop_after", "60000",
+                    "--test_interval", "1000",
+                     "-lr", "1e-3", "-batch_size", "256", "-optimizer", "adamw",
+                     "-amp", "0", "-vq_vae.grid_dim", "1", "-vq_vae.num_embeddings", "512",
+                    "-vq_vae.neihborhood", "none"]
+        },
+
+
+        {
+            "name": "VQ VAE original",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/main.py",
+            "console": "integratedTerminal",
+            "args": ["--name", "vq_vae_original", "--task", "vq_vae", "--log", "tb",
+                     "--keep_alive", "1", "-reset", "1", "-stop_after", "60000",
+                    "--test_interval", "1000",
+                     "-lr", "1e-3", "-batch_size", "256", "-optimizer", "adamw",
+                     "-amp", "0", "-vq_vae.grid_dim", "1", "-vq_vae.num_embeddings", "512",
+                    "-vq_vae.neihborhood", "none", "-vq_vae.quantizer", "hard_som",
+                    "-vq_vae.magic_counter_init", "1.0"]
+        },
+
+        {
+            "name": "VQ VAE original SOM",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/main.py",
+            "console": "integratedTerminal",
+            "args": ["--name", "vq_vae_original_som", "--task", "vq_vae", "--log", "tb",
+                     "--keep_alive", "1", "-reset", "1", "-stop_after", "60000",
+                    "--test_interval", "1000",
+                     "-lr", "1e-3", "-batch_size", "256", "-optimizer", "adamw",
+                     "-amp", "0", "-vq_vae.grid_dim", "1", "-vq_vae.num_embeddings", "512",
+                    "-vq_vae.neihborhood", "hard", "-vq_vae.quantizer", "hard_som",
+                    "-vq_vae.count_unit", "0.00001"]
+        },
+
+        {
+            "name": "VQ VAE gaussian som",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/main.py",
+            "console": "integratedTerminal",
+            "args": ["--name", "vq_vae_gaussian", "--task", "vq_vae", "--log", "tb",
+                     "--keep_alive", "1", "-reset", "1", "-stop_after", "60000",
+                    "--test_interval", "1000",
+                     "-lr", "1e-3", "-batch_size", "256", "-optimizer", "adamw",
+                     "-amp", "0", "-vq_vae.grid_dim", "1", "-vq_vae.num_embeddings", "512",
+                    "-vq_vae.neihborhood", "gaussian", "-vq_vae.quantizer", "hard_som",
+                    "-vq_vae.count_unit", "0.1", "-vq_vae.gaussaian_base", "100"]
+        },
+
+
+        {
+            "name": "VQ VAE 2 gaussian som",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/main.py",
+            "console": "integratedTerminal",
+            "args": ["--name", "vq_vae2_gaussian", "--task", "vq_vae2", "--log", "tb",
+                     "--keep_alive", "1", "-reset", "1", "-stop_after", "60000",
+                    "--test_interval", "10",
+                     "-lr", "3e-4", "-batch_size", "256", "-optimizer", "adamw",
+                     "-amp", "0", "-vq_vae.grid_dim", "2", "-vq_vae.num_embeddings", "512",
+                    "-vq_vae.neihborhood", "gaussian", "-vq_vae.quantizer", "hard_som",
+                    "-vq_vae.count_unit", "0.1", "-vq_vae.gaussaian_base", "100"]
+        },
+
+        {
+            "name": "VQ VAE 2 default",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/main.py",
+            "console": "integratedTerminal",
+            "args": ["--name", "vq_vae2_gaussian", "--task", "vq_vae2", "--log", "tb",
+                     "--keep_alive", "1", "-reset", "1", "-stop_after", "60000",
+                    "--test_interval", "10",
+                     "-lr", "3e-4", "-batch_size", "256", "-optimizer", "adamw",
+                     "-amp", "0", "-vq_vae.grid_dim", "2", "-vq_vae.num_embeddings", "512",
+                    "-vq_vae.neihborhood", "gaussian", "-vq_vae.quantizer", "hard_som",
+                    "-vq_vae.count_unit", "0.1", "-vq_vae.gaussaian_base", "100",
+                    "-vq_vae.magic_counter_init", "1"]
+        },
+
+        {
+            "name": "VQ VAE 2 face mixture",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/main.py",
+            "console": "integratedTerminal",
+            "args": ["--name", "vq_vae2_gaussian_celebahqafhd", "--task", "vq_vae2_face_mixture", "--log", "tb",
+                     "--keep_alive", "1", "-reset", "1", "-stop_after", "60000",
+                    "--test_interval", "1000",
+                     "-lr", "3e-4", "-batch_size", "256", "-optimizer", "adamw",
+                     "-amp", "0", "-vq_vae.grid_dim", "2", "-vq_vae.num_embeddings", "512",
+                    "-vq_vae.neihborhood", "gaussian", "-vq_vae.quantizer", "hard_som",
+                    "-vq_vae.count_unit", "0.1", "-vq_vae.gaussaian_base", "100", "-n_microbatch", "2"]
+        },
+
+
+        {
+            "name": "VQ VAE 2 face mixture orig",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/main.py",
+            "console": "integratedTerminal",
+            "args": ["--name", "vq_vae2_gaussian", "--task", "vq_vae2_face_mixture", "--log", "tb",
+                     "--keep_alive", "1", "-reset", "1", "-stop_after", "60000",
+                    "--test_interval", "10",
+                     "-lr", "3e-4", "-batch_size", "256", "-optimizer", "adamw",
+                     "-amp", "0", "-vq_vae.grid_dim", "2", "-vq_vae.num_embeddings", "512",
+                    "-vq_vae.neihborhood", "gaussian", "-vq_vae.quantizer", "hard_som",
+                    "-vq_vae.count_unit", "0.1", "-vq_vae.gaussaian_base", "100",
+                    "-vq_vae.magic_counter_init", "1"]
+        },
+
+        {
+            "name": "VQ VAE gaussian som few codes",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/main.py",
+            "console": "integratedTerminal",
+            "args": ["--name", "vq_vae_gaussian-few", "--task", "vq_vae", "--log", "tb",
+                     "--keep_alive", "1", "-reset", "1", "-stop_after", "60000",
+                    "--test_interval", "1000",
+                     "-lr", "1e-3", "-batch_size", "256", "-optimizer", "adamw",
+                     "-amp", "0", "-vq_vae.grid_dim", "2", "-vq_vae.num_embeddings", "32",
+                    "-vq_vae.neihborhood", "gaussian", "-vq_vae.quantizer", "hard_som",
+                    "-vq_vae.count_unit", "0.1", "-vq_vae.gaussaian_base", "100"]
+        },
+
+
+        {
+            "name": "VQ VAE original_few_codes",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/main.py",
+            "console": "integratedTerminal",
+            "args": ["--name", "vq_vae_original_few", "--task", "vq_vae", "--log", "tb",
+                     "--keep_alive", "1", "-reset", "1", "-stop_after", "60000",
+                    "--test_interval", "1000",
+                     "-lr", "1e-3", "-batch_size", "256", "-optimizer", "adamw",
+                     "-amp", "0", "-vq_vae.grid_dim", "1", "-vq_vae.num_embeddings", "32",
+                    "-vq_vae.neihborhood", "none", "-vq_vae.quantizer", "hard_som",
+                    "-vq_vae.magic_counter_init", "1.0"]
+        },
+
+
+
+        {
+            "name": "VQ VAE - fixed zero",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/main.py",
+            "console": "integratedTerminal",
+            "args": ["--name", "vq_vae_fixed_zero", "--task", "vq_vae", "--log", "tb",
+                     "--keep_alive", "1", "-reset", "1", "-stop_after", "60000",
+                    "--test_interval", "1000",
+                     "-lr", "1e-3", "-batch_size", "256", "-optimizer", "adamw",
+                     "-amp", "0", "-vq_vae.grid_dim", "2", "-vq_vae.num_embeddings", "512",
+                     "-vq_vae.neihborhood", "gaussian", "-vq_vae.quantizer", "hardsom_noupdate_zero",
+                     "-vq_vae.count_unit", "0.1"]
+        },
+
+
+        {
+            "name": "VQ VAE 2 face mixture orig zero",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/main.py",
+            "console": "integratedTerminal",
+            "args": ["--name", "vq_vae2_gaussian_zero", "--task", "vq_vae2_face_mixture", "--log", "tb",
+                     "--keep_alive", "1", "-reset", "1", "-stop_after", "60000",
+                    "--test_interval", "1000",
+                     "-lr", "3e-4", "-batch_size", "256", "-optimizer", "adamw",
+                     "-amp", "0", "-vq_vae.grid_dim", "2", "-vq_vae.num_embeddings", "512",
+                    "-vq_vae.neihborhood", "gaussian", "-vq_vae.quantizer", "hardsom_noupdate_zero",
+                    "-vq_vae.count_unit", "0.1", "-vq_vae.gaussaian_base", "100",
+                    "-vq_vae.magic_counter_init", "1"]
+        },
+
+
+        {
+            "type": "python",
+            "request": "launch",
+            "name": "Debug File",
+            "justMyCode": false,
+            "program": "${file}",
+            "cwd": "${fileDirname}"
+        },
+
+    ]
+}
