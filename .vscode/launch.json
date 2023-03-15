@@ -219,6 +219,20 @@
                     "-vq_vae.magic_counter_init", "1"]
         },
 
+        {
+            "name": "VQ VAE 2D GD",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/main.py",
+            "console": "integratedTerminal",
+            "args": ["--name", "vq_vae_2d_gd", "--task", "vq_vae", "--log", "tb",
+                     "--keep_alive", "1", "-reset", "1", "-stop_after", "60000",
+                    "--test_interval", "1000",
+                     "-lr", "1e-3", "-batch_size", "256", "-optimizer", "adamw",
+                     "-amp", "0", "-vq_vae.grid_dim", "2", "-vq_vae.num_embeddings", "512",
+                     "-vq_vae.quantizer", "gd_som"]
+        },
+
 
         {
             "type": "python",

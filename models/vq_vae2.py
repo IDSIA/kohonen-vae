@@ -6,7 +6,7 @@ from typing import Optional
 from layers.som_vector_quantizer import SOMGeometry
 
 from layers import LoggingLayer, RegularizedLayer
-from layers.som_vector_quantizer import HardSOM_noupdate_zero, HardSOM
+from layers.som_vector_quantizer import HardSOM_noupdate_zero, HardSOM, GDSOM
 
 # Code from https://github.com/rosinality/vq-vae-2-pytorch/blob/master/vqvae.py
 
@@ -108,6 +108,7 @@ class VQVAE2(LoggingLayer, RegularizedLayer, nn.Module):
         commitment_cost=0.25,
         counter_init=0.0,
         quantizer="hard_som",
+        som_cost: float = 1.0,
         som_geometry: Optional[SOMGeometry] = None,
     ):
         super().__init__()
@@ -129,11 +130,16 @@ class VQVAE2(LoggingLayer, RegularizedLayer, nn.Module):
             quantizer = HardSOM
         elif quantizer == "hardsom_noupdate_zero":
             quantizer = HardSOM_noupdate_zero
+        elif quantizer == "gd_som":
+            quantizer = (lambda num_embeddings, embedding_dim, decay, geometry, epsilon,
+                                magic_counter_init, commitment_cost:
+                                GDSOM(num_embeddings, embedding_dim, geometry=som_geometry,
+                                      commitment_cost=commitment_cost, som_cost=som_cost))
         else:
             raise ValueError(f"Invalid quantizer: {quantizer}")
 
-        self.quantize_t = quantizer(n_embed, embed_dim, geometry=som_geometry, magic_counter_init=counter_init, decay=decay)
-        self.quantize_b = quantizer(n_embed, embed_dim, geometry=som_geometry, magic_counter_init=counter_init, decay=decay)
+        self.quantize_t = quantizer(n_embed, embed_dim, geometry=som_geometry, magic_counter_init=counter_init, decay=decay, commitment_cost=commitment_cost)
+        self.quantize_b = quantizer(n_embed, embed_dim, geometry=som_geometry, magic_counter_init=counter_init, decay=decay, commitment_cost=commitment_cost)
 
         self.dec = Decoder(
             embed_dim + embed_dim,
@@ -143,8 +149,6 @@ class VQVAE2(LoggingLayer, RegularizedLayer, nn.Module):
             n_res_channel,
             stride=4,
         )
-
-        self._commitment_cost = commitment_cost
 
     def forward(self, input):
         quant_t, quant_b, _, _, _ = self.encode(input)
@@ -174,7 +178,7 @@ class VQVAE2(LoggingLayer, RegularizedLayer, nn.Module):
         quant_b = quant_b.permute(0, 3, 1, 2)
         diff_b = diff_b.unsqueeze(0)
 
-        self.add_reg(lambda: self._commitment_cost * (diff_t + diff_b))
+        self.add_reg(lambda: diff_t + diff_b)
 
         return quant_t, quant_b, diff_t + diff_b, id_t, id_b
 

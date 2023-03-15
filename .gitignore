@@ -4,3 +4,4 @@ __pycache__
 wandb
 cache
 image_out
+cluster.json

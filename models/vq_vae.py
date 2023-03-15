@@ -6,6 +6,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 from layers.som_vector_quantizer import SOMGeometry, Grid, HardSOM, HardSOM_noupdate_zero
 from layers.som_vector_quantizer import HardNeighborhood, EmptyNeigborhood, GaussianNeighborhood
+from layers.som_vector_quantizer import GDSOM
 from layers import RegularizedLayer, LoggingLayer
 
 
@@ -135,7 +136,7 @@ class VQVAE(RegularizedLayer, LoggingLayer, BaseModel):
     def __init__(self, num_hiddens, num_residual_layers, num_residual_hiddens,
                  num_embeddings, embedding_dim, commitment_cost, decay=0,
                  quantizer="hard_som", som_geometry: Optional[SOMGeometry] = None,
-                 magic_counter_init: float = 0.0):
+                 magic_counter_init: float = 0.0, som_cost: float = 0.0):
         super().__init__()
 
         self._encoder = Encoder(3, num_hiddens,
@@ -146,19 +147,21 @@ class VQVAE(RegularizedLayer, LoggingLayer, BaseModel):
                                       kernel_size=1,
                                       stride=1)
 
-        self._commitment_cost = commitment_cost
-
         if quantizer == "hard_som":
             assert som_geometry is not None
             self._vq_vae = HardSOM(
                 num_embeddings, embedding_dim, decay,
-                geometry=som_geometry, magic_counter_init=magic_counter_init)
+                geometry=som_geometry, magic_counter_init=magic_counter_init, commitment_cost=commitment_cost)
         elif quantizer == "hardsom_noupdate_zero":
             assert som_geometry is not None
             self._vq_vae = HardSOM_noupdate_zero(
                 num_embeddings, embedding_dim, decay,
-                geometry=som_geometry, magic_counter_init=magic_counter_init)
-
+                geometry=som_geometry, magic_counter_init=magic_counter_init, commitment_cost=commitment_cost)
+        elif quantizer == "gd_som":
+            assert som_geometry is not None
+            self._vq_vae = GDSOM(
+                num_embeddings, embedding_dim, geometry=som_geometry, commitment_cost=commitment_cost,
+                kohonen_cost=som_cost)
         else:
             raise ValueError(f"Invalid quantzier: {quantizer}")
 
@@ -171,14 +174,11 @@ class VQVAE(RegularizedLayer, LoggingLayer, BaseModel):
         z = self._encoder(x)
         z = self._pre_vq_conv(z)
 
-        if isinstance(self._vq_vae, HardSOM):
-            z = z.permute(0, 2, 3, 1).contiguous()
+        z = z.permute(0, 2, 3, 1).contiguous()
 
         loss, quantized, perplexity, _ = self._vq_vae(z)
 
-        if isinstance(self._vq_vae, HardSOM):
-            quantized = quantized.permute(0, 3, 1, 2)
-            loss = self._commitment_cost * loss
+        quantized = quantized.permute(0, 3, 1, 2)
 
         x_recon = self._decoder(quantized)
 

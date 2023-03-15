@@ -19,9 +19,10 @@ def a(parser: framework.helpers.ArgumentParser):
     parser.add_argument("-vq_vae.embedding_dim", default=64)
     parser.add_argument("-vq_vae.grid_dim", default=1)
     parser.add_argument("-vq_vae.gaussaian_base", default=10.0)
+    parser.add_argument("-vq_vae.som_cost", default=1.0)
     parser.add_argument("-vq_vae.neihborhood", default="hard", choice=["hard", "none", "gaussian"])
     parser.add_argument("-vq_vae.quantizer", default="hard_som",
-                        choice=["hard_som", "hardsom_noupdate_zero"])
+                        choice=["hard_som", "hardsom_noupdate_zero", "gd_som"])
     parser.add_argument("-vq_vae.magic_counter_init", default=0.0)
 
 
@@ -64,7 +65,8 @@ class VQVae(SimpleTask):
             self.helper.args.vq_vae.embedding_dim, self.helper.args.vq_vae.commitment_cost,
             decay=self.helper.args.vq_vae.decay,
             quantizer=self.helper.args.vq_vae.quantizer,
-            som_geometry=geometry, magic_counter_init=self.helper.args.vq_vae.magic_counter_init)
+            som_geometry=geometry, magic_counter_init=self.helper.args.vq_vae.magic_counter_init,
+            som_cost=self.helper.args.vq_vae.som_cost)
 
     def create_model_interface(self):
         self.model_interface = ImageReconstructionInterface(self.model)

@@ -156,11 +156,12 @@ def cos_distance(a: torch.Tensor, b: torch.Tensor) -> torch.Tensor:
 
 class HardSOM(nn.Module):
     def __init__(self, num_embeddings, embedding_dim, decay, geometry: SOMGeometry, epsilon=1e-5,
-                 magic_counter_init: float = 1.0):
+                 magic_counter_init: float = 1.0, commitment_cost: float = 0.25):
         super().__init__()
 
         self._embedding_dim = embedding_dim
         self._num_embeddings = num_embeddings
+        self._commitment_cost = commitment_cost
 
         embed = torch.randn(self._num_embeddings, self._embedding_dim)
         self.register_buffer("_w", embed)
@@ -233,7 +234,7 @@ class HardSOM(nn.Module):
             perplexity = torch.exp(-torch.sum(avg_probs * torch.log(avg_probs + 1e-10)))
 
         # Loss
-        loss = F.mse_loss(quantized.detach(), inputs)
+        loss = F.mse_loss(quantized.detach(), inputs) * self._commitment_cost
 
         # Straight Through Estimator
         quantized = inputs + (quantized - inputs).detach()
@@ -279,3 +280,78 @@ class HardSOM_noupdate_zero(HardSOM):
             self._ema_w / self._ema_cluster_size.unsqueeze(1),
             self._w
         )
+
+
+class GDSOM(nn.Module):
+    def __init__(self, num_embeddings, embedding_dim, geometry: SOMGeometry, commitment_cost: float,
+                 kohonen_cost: float = 1.0):
+        super().__init__()
+
+        self._embedding_dim = embedding_dim
+        self._num_embeddings = num_embeddings
+        self._commitment_cost = commitment_cost
+        self._kohonen_cost = kohonen_cost
+
+        self.w = torch.nn.Parameter(torch.randn(self._num_embeddings, self._embedding_dim))
+        self.register_buffer("counter", torch.tensor(0.))
+
+        self.geometry = geometry
+        self.geometry.init(self._num_embeddings)
+
+    def l2_batch(self, x: torch.Tensor, y: torch.Tensor) -> torch.Tensor:
+        # The other implementation is pairwise.
+        xn = torch.norm(x, p=2, dim=-1)**2
+        yn = torch.norm(y, p=2, dim=-1)**2
+        return xn + yn - 2 * torch.matmul(x, y.transpose(-2,-1)).squeeze(-1)
+
+    def forward(self, inputs):
+        # convert inputs from BCHW -> BHWC
+        input_shape = inputs.shape
+
+        # Flatten input
+        flat_input = inputs.view(-1, self._embedding_dim)
+
+        with torch.no_grad():
+            # Calculate distances a^2 + b^2 - 2ab
+            distances = (torch.sum(flat_input**2, dim=1, keepdim=True)
+                        + torch.sum(self.w**2, dim=1)
+                        - 2 * torch.matmul(flat_input, self.w.t()))
+
+            # Encoding
+            encoding_indices = torch.argmin(distances, dim=1).unsqueeze(1)
+            encodings = torch.zeros(
+                encoding_indices.shape[0], self._num_embeddings,
+                device=inputs.device)
+            encodings.scatter_(1, encoding_indices, 1)
+
+        quantized = self.embed_code(encoding_indices).view(input_shape)
+
+        # Kohonen loss
+        diff = self.l2_batch(self.w, quantized.unsqueeze(-2).detach()).flatten(end_dim=-2)
+
+        bmat = self.geometry.blur.get_blur_matrix(self.counter)
+        selected = bmat[encoding_indices.squeeze(-1)]
+
+        kohonen_loss = torch.bmm(diff.unsqueeze(-2), selected.unsqueeze(-1))
+        kohonen_loss = kohonen_loss.mean()
+
+        if self.training:
+            self.counter += 1
+
+        with torch.no_grad():
+            avg_probs = torch.mean(encodings, dim=0)
+            perplexity = torch.exp(-torch.sum(avg_probs * torch.log(avg_probs + 1e-10)))
+
+        # Loss
+        e_latent_loss = F.mse_loss(quantized.detach(), inputs)
+        q_latent_loss = F.mse_loss(quantized, inputs.detach())
+        loss = q_latent_loss + self._commitment_cost * e_latent_loss + self._kohonen_cost * kohonen_loss
+
+        # Straight Through Estimator
+        quantized = inputs + (quantized - inputs).detach()
+
+        # convert quantized from BHWC -> BCHW
+        return loss, quantized, perplexity, encoding_indices
+
+    def embed_code(self, embed_id):
+        return F.embedding(embed_id, self.w)

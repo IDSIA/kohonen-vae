@@ -40,5 +40,6 @@ class VQVae2(VQVae):
             commitment_cost=self.helper.args.vq_vae.commitment_cost,
             quantizer=self.helper.args.vq_vae.quantizer,
             som_geometry=geometry,
-            counter_init=self.helper.args.vq_vae.magic_counter_init
+            counter_init=self.helper.args.vq_vae.magic_counter_init,
+            som_cost=self.helper.args.vq_vae.som_cost,
         )
