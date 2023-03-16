@@ -165,7 +165,7 @@ class HardSOM(nn.Module):
 
         embed = torch.randn(self._num_embeddings, self._embedding_dim)
         self.register_buffer("_w", embed)
-        self.register_buffer("_ema_w", embed)
+        self.register_buffer("_ema_w", embed.clone())
         self.register_buffer('_ema_cluster_size', torch.full([num_embeddings], fill_value=magic_counter_init))
         self.register_buffer("counter", torch.tensor(0.))
 
@@ -200,7 +200,7 @@ class HardSOM(nn.Module):
             torch.distributed.all_reduce(dw)
 
         self._ema_w = self._ema_w * self._decay + (1 - self._decay) * dw
-        self._weight = self._ema_w / self._ema_cluster_size.unsqueeze(1)
+        self._w = self._ema_w / self._ema_cluster_size.unsqueeze(1)
 
     def forward(self, inputs):
         # convert inputs from BCHW -> BHWC
