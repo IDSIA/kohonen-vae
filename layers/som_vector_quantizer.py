@@ -177,9 +177,12 @@ class HardSOM(nn.Module):
         self.geometry.init(self._num_embeddings)
 
     def update(self, encodings, flat_input):
-        proj = self.geometry.blur.get_blur_matrix(self.counter)
-        proj.fill_diagonal_(1.0)
-        encodings_sum = encodings @ proj
+        if not isinstance(self.geometry.blur, EmptyNeigborhood):
+            proj = self.geometry.blur.get_blur_matrix(self.counter)
+            proj.fill_diagonal_(1.0)
+            encodings_sum = encodings @ proj
+        else:
+            encodings_sum = encodings
 
         n_writes = torch.sum(encodings_sum, 0)
         if torch.distributed.is_initialized():
