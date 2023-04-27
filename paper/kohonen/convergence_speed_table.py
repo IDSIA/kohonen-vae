@@ -78,16 +78,22 @@ def get_stats_for_run(r, k_trehsold, relative_threshold):
         "K": get_intersection(r, k_trehsold) / 1000
     }
 
+
 def get_k_trehsold(baseline, relative_threshold):
     avg, _, _ = get_history_average(baseline)
     return min(avg) * relative_threshold
 
+
+def is_baseline(run):
+    c = run.config
+    return (c["vq_vae.quantizer"] == "vq_vae_original" and c["vq_vae.neihborhood"] == "none" and
+            c["vq_vae.num_embeddings"] == 512 and c.get("vq_vae.magic_counter_init", 0) == 1)
+
+
 def find_baseline(groups):
     res = None
     for n, runs in groups.items():
-        c = runs[0].config
-        if (c["vq_vae.quantizer"] == "hard_som" and c["vq_vae.neihborhood"] == "none" and
-            c["vq_vae.num_embeddings"] == 512 and c.get("vq_vae.magic_counter_init", 0) == 1):
+        if is_baseline(runs[0]):
             assert res is None, "Multiple baselines found"
             res = n
     assert res is not None, "Baseline not found"
@@ -275,7 +281,7 @@ def print_big_table_format2(datasets, formatter: Formatter):
 
     all_models = [(k, v) for k, v in all_models.items()]
     all_models = list(sorted(all_models, key=get_key))
-    columns = ["Loss", "+10%", "+20%"]
+    columns = ["Loss", "+10\\%", "+20\\%"]
 
 
     groups_10 = {k: get_stats(v, 1.1, key_priorities.keys(), filter_fn=lambda x: True, rename_baseline=False) for k, v in datasets.items()}

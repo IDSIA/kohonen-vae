@@ -1,0 +1,41 @@
+program: main.py
+command:
+  - ${env}
+  - python3
+  - ${program}
+  - ${args}
+method: bayes
+metric:
+  name: validation/mean_loss
+  goal: minimize
+parameters:
+  log:
+    value: wandb
+  task:
+    value: vq_vae
+  stop_after:
+    value: 30000
+  lr:
+    value: 1e-3
+  batch_size:
+    value: 256
+  test_batch_size:
+    value: 512
+  wd:
+    value: 0
+  optimizer:
+    value: adamw
+  amp:
+    value: 0
+  vq_vae.quantizer:
+    value: gd_som
+  vq_vae.grid_dim:
+    value: 2
+  vq_vae.count_unit:
+    value: 0.1
+  vq_vae.neihborhood:
+    value: hard
+  vq_vae.som_cost:
+    distribution: log_uniform
+    min: -4.6
+    max: 2.3
